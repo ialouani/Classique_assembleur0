@@ -9,4 +9,4 @@ exo1.o: exo1.c
 exo2.o: exo2.c
 	gcc -c exo2.c
 clean:
-	rm -rf *.o test_tout
+	rm -rf *.o test_tout test_tout1 test_tout2
