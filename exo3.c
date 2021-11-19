@@ -133,8 +133,29 @@ int main(int argc, char* argv[]){
     mf++;
   }
   printf("%.2f--%.2f\n",somme1_a,somme2_a);
+  printf("rslt produit methode 1:%.2f\n",somme1_a*somme2_a);
+  printf("%.2f * %.2f=%.2f\n",(float)(pow(2.13,N+1)-1)/(2.13-1),(float)(pow(3.21,N+1)-1)/(3.21-1),((float)(pow(2.13,N+1)-1)/(2.13-1)) * ((float)(pow(3.21,N+1)-1)/(3.21-1)));
   printf("%.2f--%.2f\n",(float)(pow(2.13,N+1)-1)/(2.13-1),(float)(pow(3.21,N+1)-1)/(3.21-1));
+  printf("%.2f\n",3622.36*168718.20);
+  printf("%d\n",33.45454545454545454545454==33.454545454545454545454548);
+  //ça donne 1 car underflow (plus de 23 chiffres apres la virgule)
+  //et puisque float pas double donc se limite a la comparaison
+  //en virgule FLOTTANTE des 23 premiers chiffres apres la virgule..///
   return 0;
 }
+
+
+/*Le calcul, juste avec 2 et 3, devient faux si on rajoute quelques chiffres apres la virgule. Ils necessitent davantage de
+bits dans la mantisse, et les arrondis des puissances arrivent plus vite (le nombre de bits apres la virgule augmente
+de facon arithmetique à chaque produit), et dépasse les 23 bits de la mantisse flottante. Les arrondis sont différents
+dans les 2 cas. Dans le premier cas, les deux nombres qu’on ajoute sont tres pres l’un de l’autre. Dans le second cas,
+on va ajouter 1 ∗ 3 N avec 2 ∗ 1, ce qui cause des arrondis.*/
+
+//explication et remarque importante:
+
+/*Avec le calcul flottants, l’addition n’est pas commutative. L’exemple vu dans l'exercice precedent et qui servira à la comprehension du but de cet exo(exo3) donne −1 comme résultat, et non 0. La raison
+est qu’on fait la somme entre des grandes et de petites valeurs, et le calcul est approché. Pour faire le bon calcul, il
+faudrait parcourir la liste dans le meme sens pour l’addition et la soustraction. En général, il ne faut pas tester un
+nombre flottant avec l’opérateur “==”, car les calculs sont approchés.*/
 
 
