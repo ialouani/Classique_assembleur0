@@ -1,0 +1,348 @@
+TD1:(correction)
+1->Exercice:
+=>début de l'exo1:
+*définition d'un overflow:
+L'overflow se produit lorsqu'on essaie de coder un nombre suivant un nombre de bits insuffisant ; par exemple on code le nombre 4 suivant 1 bit ; ce qui est impossible. Car le nombre 4 est 11 qui se code en 2 bits donc impossible de le coder suivant 1 bit. Si on veut coder 4 suivant 1 bit, ça s'appelle un overflow car minimum on doit le coder suivant 2 bits pas 1 bit < 2 bits;donc on appelle cela un overflow.
+a->Intervalle des valeurs représentables à l'aide d'un char:
+Un char est représentable en 8 bits.(1 octet) Un charactère est représentable suivant 1 octet par le Unicode (ASCII code) donc à chaque charactère on lui associe un nombre integer (unisgned int) qui est codé suivant 8 bits soit 1 octet. C'est pur cela un char est suivant 1 octet. char est le type dans C.
+Pour afficher cet intervalle de valeurs représentables ; on utilise une boucle qui incrémente une valeur positive et à fur et à mesure de l'incrémentation si le prochain nombre obtenu apres incrémentation est négatif c'est à dire qu'on a fait un overflow.
+int main(int argc, char* argv[]){
+char a=0;
+while(a>=0) {a++;}
+//ici a<0; donc le max représentable est a-1 (l'avant derniere valeur incrémentée) mais le problème est que a-1 on peut pas la faire sinon ça va donner un type int (4 octet>1 octet) et nous on veut un char.
+=>amélioration:
+char a=0;
+char b;//sortie a<0 (a!=0) donc while(a>=0)
+while(a>=0) {b=a;a++}
+//b représente le max représentable
+printf("[%d;%d]\n",a,b);
+//le min est a car <0 et inversement;si on incrémente la valeur diminue en valeur
+//absolue;donc c'est le min a qui est <0.
+return 0;
+}
+Rq: l'ensemble des valeur est l'intervalle [-128,127] à se rappeler.
+pour se rappeler facilement 0 est compté >0 du coup avec 127 on a 128 nombres et pusique 0>0 donc de l'autre coté on a 128 nombres à part 0 dans l'autre demi-intervalle. Donc ça fera 128*2=256 nombres au maximum ce qui est le cas car avec 8 bits on peut représenter au max le nombre: sum_{k=0}^{k=7} 2**k = 2^8-1 = 255 avec le nombre 0 ça fait exactement 256 nombres représentables.
+char peut etre signé.
+=>au lieu d'avoir [0;255] on a pour les signés: [-128,127]. (2^(n-1)-1 est le max représentable pour n bits (!unsigned char))
+2^7-1=128-1=127 pour 8 bits.
+b->Faisons la meme chose pour short,int,unsigned char:
+short et int sont signés (types de valeurs (variables --valeurs) signées)
+short -> 2 octet (2^15 -1 le max>0 représentable)
+int -> 4 octet (2^31 -1 le max>0 représentable)
+On peut faire une verification des 2 maxs représentables (short_max et int_max) avec le calcul prochain (de verification): pow(2,nombre_bits-1)-1.
+résultats corrects.
+Maintenant, le unsigned char:
+toujours une valeur de type unsigned char est >=0. 
+là au lieu de basculer dans une valeur <0 telque en ||>maximum_représentable_positif ; là on va basculer sur 0.
+~0 est >0 et <0 on sait que les 2 représentations sont les memes si unsigned char (0 valeur) ; donc: puisque le zero <0 est plus grand (comme ce qu'on vient de dire avant) donc (en valeur absolue --je rappelle!) le basculement à zero marque en -- la valeur positive maximale qui peut etre de type unsigned char et etre représentable sans overflow.
+int main(void){
+unsigned char a=0;
+a++;
+unsigned char b;
+while(a!=0) {b=a;a++;}
+printf("[%d;%d]\n",0,b);
+return 0;}
+logiquement ça sera 256 nombres tous>=0 soit l'intervalle: [0;255].
+c->voir exo1.c.
+d->interprétation de l'ensemble des resultats(incluant la justification sur la raison pour laquelle le resultat est juste)
+char x=120;
+on a 120<127 donc auxun overflow ; mais x=x+120(conversion automatique car x char reçoit donc forcément un typecasting qui se voit pas) dépasse 127 donc overflow. ça donne quoi quand même?
+ =>x+8 donne -128 donc x+9 donne (ça doit tourner autour de l'intervalle (incrémentation suivant un x en overflow decremente en valeur absolue un nombre relatif de fois le nombre min représentable) ) -127 x+10 -126 donc:
+ x+10+110(x+120)=-126+110=-16; donc on va obtenir -16 à la fin. c'est correct.
+x=x-75 de la même manière au lieu d'ajouter on retranche en respectant le non dépassement suivant [-128;127] donc -16-75=-91 appartenanat à l'intervalle donc cava. Puis la dernière opération consiste à: x=x-87 si on fait le calcul -87-91=-178 et -178 n'appartient pas. On cherche y(|y|<87) telque: -91-y=-128 donc y=128-91=37 donc x-37 donne -128 => x-38 donnera: 127 puis on decrémente les valeurs pour rester de nouveau dans l'intervalle min_max=> x-40=125 et donc: x-40-47(-87~)=125- 47=88-10=78;qui est juste. EN fait; c'est un intervalle presque cyclique (torique espace euclédien d'1 dimension) de meme pour unsigned char aussi. (d'un seul coté.) Et puisque les décalements vers le max apres un -- donnant en overflow sont les memes que les declaments vers le min apres un ++ donnant un overflow donc ça se compense pour retrouver le vrai nombre à la fin mais il faut que la suite des opérations donne un nombre sans décalements potentielles appartenant à l'intervalle concerné.
+2->Exercice:
+Overflow/Underflow sur les entiers
+valeur trop grande et trop petite pour une précision epsilon à réspecter.
+On va voir cela:
+a->on a pour tout n>=0:
+s_0=1;
+s_n=s_{n-1}+1;
+=>ecrivons un programme calculant et affichant les valeurs de s_n pour n entre 1 et 128. On utilise ici le type float pour determiner le type du terme de la suite s_n pour tout n>=0. (rappelons qu'un int est aussi un float mais la reciproque n'est pas toujours vraie)
+int main(){
+float terme=1;
+int n=1;
+while(n<=128){
+terme=2*terme+1;//le terme numéro n au début le 1er terme <-> s_1
+//donc au final s_n soit s_128.
+printf("s_{%d}=%.2f\n",n,terme);
+n++; return 0;}
+b->n/s_{n} se fait suivant un calcul produisant un overflow:
+On remarque que s_{127} le resultat est inf. (et pour tout n d'ailleurs >127)
+=>EXPLICATION:
+un float est codé suivant la norme IEEE 754 qui code n'importe quel flottant en codage en virgule flottante. Pour tout nombre avec virgule négatif ou non (bit de signe tout à gauche); on peut l'ecrire sous la forme suivante: 1,m*2^e avec m la mantisse qu'on représente suivant cette norme largement répandue en 23 bits et e on lui ajoute 127 puis on code l'ensemble sur 8 bits au total.
+1,m*2^e telque m est ecrit en dur en ecriture BINAIRE.
+->>exemples:
+0.8125;si on lui applique la procédure de *2 puis le reste par 1 !=1 remultiplier par deux sinon arret on va trouver dans le sens croissant des operations (tout a gauche bit fort): 1101 donc 0.8125=0.1101 en binaire ce qui est parfaitement logique avec la méthode sous-jacente de : 0.8125=1/2+1/4+1/16=2^(-1)+2^(-2)+2^(-4) donc en binaire cela donnera: 0.(on garde le 0. comme marqueur)1101 <=> 
+ 0.8125=0.1101 en binaire.
+puis vient la norme IEEE qui nous impose de l'ecrire sous la forme:
+1.101*2^(-1) qui est l'ecriture de n'importe quelle nombre flottant en pseudo-binaire: 1.m*2^e on identifie ici la mantisse 1010..0 (23 bits) ((car virgule donc ajout des zéros tout a droite)) et l'exposant auquel on ajoute 127 (contrainte des nombres<0 sur 8 bits) + bit de signe (ici 0 car 0.8125>0);cela donnera:
+e=-1+127=126<127 et m=1010..0 (20 zéros apres le dernier 1 visible ICI) et bit de signe tout à gauche qui vaudra 0. C'est la norme IEEE 754.
+RQ(!!): les nombres à virgule flottante sont interpretés de cette façcon par la machine.
+ ==>>>Ainsi, 0.8125 ne sera pas manipulé via la représentation 0.1101 premiere mais la suivante qui en est issue(application regles norme IEEE 754).
+=>REVEnons à notre exo:
+l'overflow est produit pour n=127.
+un fichier qui donne la 1ere représentation est le suivant: top_conversion.java 
+->sudo apt install open-jdk
+->javac top_conversion.java 
+->java top_conversion
+Entrez 0.8125 (Input) && Output:  
+ 0.1101.
+c'est bon.(à comprendre et mettre sur notre compte github.com pour un développement futur l'utilisant).
+Valeurs particulières:
+1)0: mantisse a zéro;exposant aussi.(signe 0 ou 1)
+2)Inf: mantisse a zéro;champ exposant à 11111111
+3)NaN:((not a number)) mantisse non nulle et champ exposant à 11111111
+revenons à notre question:
+l'overflow est lorsque n=127:(s_{127}=Inf)
+Pourquoi? (c'est ca un overflow)
+Inspectons le champ exposant dans s_{127} de type float:
+->>
+s0=1;
+s1=2*s0+1=1+2**1
+s2=1+2+2**2
+.
+.
+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(jeton personnel).#__--#
+=>donc sN=\sum_{k=0}^{k=n} 2**k(2^k).
+pour ecriture normalisée il faut factoriser par la plus grande puissance,donc ca sera:
+s_{127}=2^127(\sum_{k=-127}^{k=0} 2**k(2^k)) 
+donc la mantisse sera le codage en binaire de la sous_somme ET enfin l'exposant sera 127. =>e=127+127=254.
+On sait que e est non signé et fixe par là ()la plus petite valeur representable (underflow amenant à une perte de précision si opérations entre 2 nombres d'ordre de grandeur trop différents ça donnera le même nombre..(ajout d'un nombre trop trop petit ()<=>underflow car faute résultante d'une tres petite valeur pas possible de la représenter) mais aussi la plus grande reservé à l'infini(Inf.).
+Qui sera en 8 bits le nombre 255. Ainsi, 254 est l'exposant le plus grand qu'on peut avoir pour un nombre flottant représentable. Mais, puisque m(inf)=0 donc si la mantisse est !=0 et l'exposant arrive à 254 donc ça peut donner l'infini. Les trucs ajoutés de la mantisse via l'exposant qui reste fixé se rapproche de la valeur d'un flottant dont l'exposant est e+1(soit 255) mais sa mantisse nulle. Puisque, ici pour n=127 on a un exposant de 127 donc e=127+127=254 avec une mantisse qui est en binaire somme_{k=-127}^{k=0} 2**k !=0 bien sur donc s_{127} sera affichée Inf sur le terminal.
+RAPPELS à rappeler:
+ -NaN(mantisse non nulle + exp à 11111111) => used in division de inf par inf.
+ -Inf(mantisse nulle + exp à 11111111) => used in division d'un nombre par 0.
+ -0 <=> mantisse nulle et exposant à 0 exceptionnellement.(signe 0 ou 1)--///
+Et donc s_{n}=Inf;pour tout n>=127.(champ exposant à 255-1 + mantisse !=0 qui vaut au passage sum_{k=-n}^{k=0} 2^k.((en binaire)))
+<=>(-A)overflow sur les flottants.
+c->Analyse de la parité des éléments de la suite (sn)_{n}:(pour n>=0)
+Avec ce qu'on a ecrit dans l'exo2.c ; on retrouve la parité dés n=24 donc les elements sont tous impairs pour tout n<=23. Pour tout n>=24: s_{n}%2==0.
+Explication:
+Inf=>Overflow=>probleme de codage normal de l'exposant avec la norme imposée.
+resultat incomprehensible(parité par exemple)=>inspection de la mantisse;seul element restant.
+(pas le signe car l'overflow sur les flottants ne traduit pas un parcours cyclique mais un débordement de la capacité de stockage du codage binaire de l'exposant suivant le max imposé (127 pour 254 en exposant champ == 255-1 avec de preference mantisse nulle sinon avec le max dans l'exp. ça peut se rapprocher de Inf(voir exemple de s_{127} question 2.))
+pour s_{23} la mantisse est (suivant avant): 2^(-23)+..+2^(-1) en binaire. Ceci se code suivant 23 bits (32 bits pour la norme en virgule flottante (23+8+1)) : 11..11 (23 1). 
+=>le probleme;c'est que pour n=24;la mantisse sera d'un bit de plus tout à droite (<1 en binaire) donc débordement de la capacité maximale de la mantisse (block mantisse)=>négliger le 1=>perte de 1=>~~~perte de parité sur le nombre en entier (mantisse et nombre de type int donc la mantisse code en partie surtout les derniers bits tout à droite la parité du nombre);c'est pour cela que s_{24} est pair au lieu d'etre impair. Le programme ainsi ecrit de manière basique nous informe explicitement sur la taille de la mantisse pour le codage des nombres flottants specifique à la machine.
+d->Application de ce principe pour trouver pour le type double (double float comme un long int....) la taille de la mantisse ainsi que l'exposant maximum:
+nm2 vaut 53 et nm2 est suivant la boucle: le 1er n telque s_{n} est pair donc 2^(-53) dans la mantisse en fait partie ce qui a rendu le nombre pair <=> taille de la mantisse pour des double est : 52.(52 bits;à retenir)
+Avec ce qu'on a dit en terme d'e dans le double; la valeur maximale !=Inf est suivant le max bijectif de l'exposant donc ici c'est 1023 comme exposant maximale
+correspondant à s_{1023}!=Inf et s_{1024}==Inf. Et c'est vrai car en 64 bits au lieu de 32 bits (long double(~80 bits) > double(64) > float(32) ~~~ long long int (~ 128) > long int (64) > int (32) > short(16) puis vient le char de 1 octet) avec 52 bits de mantisse il reste 12 bits donc 11 pour l'exposant. On y ajoute toujours 1023 comme le 127 pour le type float. pour inf donc de type futur double ; on aura comme valeur maximale de l'e tous bits à 1 <=> valeur de 2^11-1=2047 et -1023=( ())   1024 . Donc e=1024 pour Inf et donc valeur max de l'e pour les double telque les nombres avec cet exposant est isfinite est 1023 déjà trouvé là-haut.CQFD de 2manieres.
+RQ: la fonction isfinite de la bibliotheque standard math.h (C90 minimum) fournit un moyen pour traduire syntaxiquement la condition d'arret de la boucle.
+RQ2:s_{127} = Inf_premier => 127 exposant maximale et donc ici : (quand on parle d'exposant;on parle de la valeur du champ exposant dans la representation en virgule flottante norme IEEE) si s_{1022} est le dernier non infini donc 1023 en s_{?n?} est Inf_premier <=> $n est l'exposant maximale. (en terme de nombre normale y attaché != Inf). 
+RQ3: pour ne pas se chambouler: exposant maximal<=>incluant Inf_primo dans les successions de calculs machine.
+Conclusion: double (64 bits)=>taille mantisse à 52 et exposant maximal à 1023.
+~Underflow pour le truc de mantisse car perte de précision vu 2^(-53) a prendre en compte pour un codage max max de 52 bits.(via un nombre trop petit la valeur par défaut est prise sans le considérer (-))
+~Overflow(+): Valeur trop grande impliquant une interpretation en Inf dans la machine. Ainsi 2^(127)+1 est Inf sur la machine.(mantisse non nulle)./////
+3->Exercice:
+a->&b->:(avec test direct (ss fonction prédéfines) VIA:: #define N 10)
+(car pour verifier avec pow il faudrait atoi(argv[1]) QUI n'est pas un float
+donc la macro;define N 10 est mieux(meme valeur que la qst. suivante.)
+On veut calculer l'expression de l'exo3.
+2 facons differentes proposees:
+1)calcul des 2 sommes puis produit:
+Rq: on évite la fonction pow pour calcul direct des puissances de 2 (somme1) ou de 3(somme2).
+=>au lieu de faire pow(2,i) pour calculer 2^i on interprete 2**i comme 2*2..*2 i fois donc int a=2 puis a=a*2 i-1 fois <=> boucle.
+->dans le main, la premiere methode en utilisant somme1,somme11 et somme2,somme22 calculs intermediaires puis comparaison vrais résultats avec la declaration d'un double pour 2**(N+1)-1 ou 3**(N+1)-1 /2 (en entier);resultat semblant correct.
+->2ieme methode:
+au lieu de calculer chaque somme séparément puis de faire une boucle, on y procede differemment;c'est à dire:en debutant avec somme2, on va pouvoir multiplier somme2 avec chaque puissance de 2(^number?==i) pour i=0 jusqu'à N avec tous les rslts reunis en somme ensemble.
+(Voir fichier exo3.c).
+c->(( & d->  ))Qst.(3):::
+avec int t1[N+2] et t2[N+2];on arrive au résultat.
+(VOIR exo3.c)
+e->Comparaison des sommes(..):::
+;[[d->reprise de la 1ere methode rapidement avec {c->} et lentement pour la deuxieme methode: TOUT EST --detaillé dans le fichier exo3.c--.////]]
+e->Comparaison des résultats:
+voir suite concrete fichier source exo3.c.
+FIN TD1.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
